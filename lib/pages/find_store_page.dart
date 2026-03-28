@@ -28,9 +28,32 @@ class _FindStorePageState extends State<FindStorePage> {
     setState(() => isLoading = true);
     await Future.delayed(const Duration(seconds: 2));
 
+    //mock up store
+    setState(() {
+      currentLocation = 'Pinklao';
+
+      stores = [
+        // {
+        //   'name' = 'Amika 3D Print',
+        //   'service' = 'Resin print'
+        //   'distance' = '0.5 km',
+        //   'location' = 'Pinklao',
+        //   'color' = Colors.blue.shade400,
+        // },
+      ];
+    });
   }
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16/0)),
+          ],
+        )),
+    );
   }
 }

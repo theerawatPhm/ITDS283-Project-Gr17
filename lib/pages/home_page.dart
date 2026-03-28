@@ -1,8 +1,10 @@
+import 'package:app_3d_now/pages/find_store_page.dart';
 import 'package:app_3d_now/pages/order_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'new_order_page.dart';
 import 'shared_widgets.dart';
+import 'find_designer_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -202,7 +204,15 @@ Widget _buildServicesList() {
         children: services.map((service) {
           return Padding(
             padding: const EdgeInsets.only(right: 12.0),
-            child: Container(
+            child: GestureDetector(
+              onTap: () {
+                if (service == 'Find Designer'){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FindDesignerPage()));
+                }else if(service == 'Find Store'){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FindStorePage()));
+                }
+              },
+              child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -217,6 +227,7 @@ Widget _buildServicesList() {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ),
             ),
           );
         }).toList(),
