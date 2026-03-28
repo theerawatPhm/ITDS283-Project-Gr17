@@ -1,7 +1,7 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'review_order_page.dart';
 
 class NewDesign extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -26,6 +26,8 @@ class _NewDesignState extends State<NewDesign> {
   String  _selectedScrub = 'No';
   String  _SelectedColor = 'Filament Color';
   String  _selectedRequestFile = 'No';
+  String? _selectedFileSizes;
+  final TextEditingController _otherController = TextEditingController();
 
   Future<void> _pickFile() async{
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -33,8 +35,10 @@ class _NewDesignState extends State<NewDesign> {
       allowedExtensions: ['stl', 'obj', 'gcode'],
     );
     if(result != null){
+      final file = result.files.single;
       setState(() {
-        _selectedFileName = result.files.single.name;
+        _selectedFileName = file.name;
+        _selectedFileSizes = '${(file.size / (1024 * 1024)).toStringAsFixed(1)} Mb';
       });
     }
   }
@@ -103,15 +107,15 @@ class _NewDesignState extends State<NewDesign> {
                           return;
                       }
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Order Submitted Successfully'),
-                        backgroundColor: Colors.green,));
-
-                        if(Navigator.canPop(context)){
-                          Navigator.pop(context);
-                        }else if(widget.onBackToHome != null){
-                          widget.onBackToHome!();
-                        }
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewOrderPage(
+                        fileName: _selectedFileName!,
+                        fileSize: _selectedFileSizes ?? 'Unknown Size',
+                        material: _selectedMaterial,
+                        quality: _selectedQuality,
+                        scrub: _selectedScrub,
+                        color: _SelectedColor,
+                        requestFile: _selectedRequestFile,
+                        otherText: _otherController.text.trim().isEmpty ? 'No' : _otherController.text.trim())));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryOrange,
@@ -163,7 +167,8 @@ class _NewDesignState extends State<NewDesign> {
                       border: Border.all(color: primaryDark),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const TextField(
+                    child: TextField(
+                      controller: _otherController,
                       decoration: InputDecoration(
                         hintText: 'Optional...',
                         border: InputBorder.none,
