@@ -5,6 +5,7 @@ import 'new_order_page.dart';
 import 'find_designer_page.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FindStorePage extends StatefulWidget {
   const FindStorePage({super.key});
@@ -64,7 +65,7 @@ class _FindStorePageState extends State<FindStorePage> {
         currentLocation = realLocationName;
       });
 
-      const String apiKey = '';
+      final String apiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
       final double lat = position.latitude;
       final double lng = position.longitude;
