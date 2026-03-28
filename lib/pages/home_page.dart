@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'order_page.dart';
 import 'new_order_page.dart';
@@ -391,5 +390,4 @@ Widget _buildServicesList() {
         )
     );
   }
-
 }
