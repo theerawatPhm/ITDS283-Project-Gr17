@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'new_order_page.dart';
 
 class FindStorePage extends StatefulWidget {
   const FindStorePage({super.key});
@@ -70,7 +71,6 @@ class _FindStorePageState extends State<FindStorePage> {
               child: SizedBox(
                 width: double.infinity,
                 height: 48,
-              
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -155,7 +155,46 @@ class _FindStorePageState extends State<FindStorePage> {
         );
       },
       child: Container(
-        child: Text(store['name']),
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade400)
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: store['color'],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Icon(Icons.storefront, color: Colors.white, size: 40,),
+            ),
+            const SizedBox(width: 16,),
+            Expanded(
+              child:Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(store['name'], style: TextStyle(fontWeight: FontWeight.bold, color: primaryDark, fontSize: 16)),
+                  const SizedBox(height: 4,),
+                  Text(store['service'], style: TextStyle(color: primaryDark, fontSize: 14)),
+                  Text(store['distance'], style: TextStyle(color: primaryDark, fontSize: 14)),
+                  const SizedBox(height: 8,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(store['location'],style: TextStyle(color: primaryDark, fontSize: 14)),
+                      Text('More detail>', style: TextStyle(color: primaryDark, fontSize: 14))
+
+                    ],
+                  )
+                ],
+              ))
+          ],
+        ),
       ),
     );
   }
@@ -178,24 +217,144 @@ class StoreDetailPage extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Text('Find Stores', style: TextStyle(fontSize: 28, color: primaryDark, fontWeight: FontWeight.bold)),
-                  Positioned(
-                    left: 0,
-                    child: IconButton(onPressed: ()=> Navigator.pop(context), icon: Icon(Icons.arrow_back, color: primaryDark, size: 28)
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text('Find Stores', style: TextStyle(fontSize: 24, color: primaryDark, fontWeight: FontWeight.bold)),
+                    Positioned(
+                      left: 0,
+                      child: IconButton(onPressed: ()=> Navigator.pop(context), icon: Icon(Icons.arrow_back, color: primaryDark, size: 28)
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Expanded(child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Text('Detail come soon'),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: StoreData['color'],
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+                      ),
+                      //mock up store page เดี๋ยวเอามาใส่เพิ่มจ้า
+                      child: const Icon(Icons.storefront, size: 80, color: Colors.white),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(StoreData['name'], style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDark)),
+                          const Divider(height: 30),
+
+                          _buildInfoSection('Store detail', '${StoreData['service']}\n${StoreData['distance']}', primaryDark),
+                          const SizedBox(height: 16,),
+                          _buildInfoSection('Price rate', 'At lease 1 piece, small size\nStart at 5.99', primaryDark),
+                          SizedBox(height: 16,),
+                          _buildInfoSection('Contact', 'Tel: +66 63 343 3456\nEmail: contact@${StoreData['name'].toString().replaceAll(" ", "").toLowerCase()}.com', primaryDark),
+
+                          const SizedBox(height: 32,),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(onPressed: (){
+                              _showOrderAlert(context, primaryOrange, primaryDark);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryOrange,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                            ), child: const Text('Order Now', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),)),
+                          )
+                        ],
+                      ),)
+                  ],
+                ),
+              )
             ))
           ],
         )),
     );
   }
+
+  Widget _buildInfoSection(String title, String detail, Color textColor){
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 14),),
+          const SizedBox(height: 4,),
+          Text(detail, style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.5)),
+        ],
+      );
+    }
+
+    //alert dialog
+    void _showOrderAlert(BuildContext context, Color primaryOrange, Color primaryDark){
+      showDialog(context: context,
+      builder: (BuildContext context){
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          contentPadding: const EdgeInsets.all(32),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Do you have\nyour model yet?', style: TextStyle(color: primaryOrange, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 32,),
+              //no btn
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(onPressed: (){
+                  Navigator.pop(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: primaryOrange),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: Text('No, Find a Designer', style: TextStyle(color: primaryOrange),)),
+              ),
+              const SizedBox(height: 12,),
+
+              //yes btn
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NewDesign()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ), child: Text('Yes, I do have!', style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              const SizedBox(height: 16,),
+              GestureDetector(
+                onTap: ()=> Navigator.pop(context),
+                child: Text('Back to find store', style: TextStyle(color: Colors.grey.shade400, fontSize: 12),),
+              )
+            ],
+          ),
+        );
+      });
+    }
 }

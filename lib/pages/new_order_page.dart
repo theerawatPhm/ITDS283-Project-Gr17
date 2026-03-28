@@ -33,15 +33,23 @@ class _NewDesignState extends State<NewDesign> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Text(
-                  'Import Design',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDark,
-                  ),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text('Import Deign', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDark),
+                    ),
+                    Positioned(
+                      left: 0,
+                      child: IconButton(onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.arrow_back, color: primaryDark, size: 28,)))
+                  ],
                 ),
               ),
               const SizedBox(height: 20,),
-// UPLOAD BOX
+              // UPLOAD BOX
               _buildUploadBox(),
               const SizedBox(height: 16),
               Row(
@@ -56,7 +64,7 @@ class _NewDesignState extends State<NewDesign> {
                     foregroundColor: primaryOrange,
                     side: BorderSide(color: primaryOrange),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(20),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                   ),
