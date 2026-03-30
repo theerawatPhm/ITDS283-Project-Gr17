@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 class ReviewOrderPage extends StatelessWidget {
 
-  final String fileName;
-  final String fileSize;
+  final String? fileName;
+  final String? fileSize;
+  final String? designerDescription;
+
   final String material;
   final String quality;
   final String scrub;
@@ -12,7 +14,7 @@ class ReviewOrderPage extends StatelessWidget {
   final String requestFile;
   final String otherText;
 
-  const ReviewOrderPage({super.key, required this.fileName, required this.fileSize,
+  const ReviewOrderPage({super.key,this.fileName,this.fileSize, this.designerDescription,
   required this.material, required this.quality, required this.scrub, required this.color,
   required this.requestFile, required this.otherText});
 
@@ -21,6 +23,8 @@ class ReviewOrderPage extends StatelessWidget {
     final Color primaryDark = const Color(0xFF4A3B52);
     final Color primaryOrange = const Color.fromARGB(232, 202, 86, 44);
     final Color bgColor = const Color(0xFFF8F8F8);
+
+    final bool isDesignerOrder = designerDescription != null && designerDescription!.isNotEmpty;
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -43,33 +47,23 @@ class ReviewOrderPage extends StatelessWidget {
               ),
             ),
             ),
-            Expanded(child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16,),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: primaryOrange, width: 1.2),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.insert_drive_file_outlined, color: primaryOrange, size: 60),
-                        const SizedBox(width: 16,),
-                        Expanded(child: Text(fileName, style: TextStyle(fontWeight: FontWeight.bold, color: primaryDark, fontSize: 16)),
-                        ),
-                        Text(fileSize, style: TextStyle(color: primaryDark, fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32,),
-                  Text('Model Order Detail', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark),),
-                  const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16,),
+                    
+                    // 🔴 3. เช็คเงื่อนไขเพื่อสลับกล่องด้านบน
+                    if (isDesignerOrder) 
+                      _buildDescriptionBox(designerDescription!, primaryOrange, primaryDark)
+                    else 
+                      _buildFileBox(fileName ?? 'Unknown File', fileSize ?? '-', primaryOrange, primaryDark),
+
+                    const SizedBox(height: 32,),
+                    Text('Model Order Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark),),
+                    const SizedBox(height: 16),
                     _buildDetailRow('Material:', material, primaryDark),
                     _buildDetailRow('Quality:', quality, primaryDark),
                     _buildDetailRow('Scrub:', scrub, primaryDark),
@@ -77,24 +71,25 @@ class ReviewOrderPage extends StatelessWidget {
                     _buildDetailRow('File:', requestFile, primaryDark),
                     _buildDetailRow('Other:', otherText, primaryDark),
 
-                  const SizedBox(height: 32,),
-                  _buildDetailRow('Printing Fee', '฿600', primaryDark),
-                  _buildDetailRow('Printing fee', '฿600', primaryDark),
-                  _buildDetailRow('Designer fee', '฿900', primaryDark),
-                  _buildDetailRow('Packaging', '฿70', primaryDark),
-                  _buildDetailRow('Delivery', '฿60', primaryDark),
-                  _buildDetailRow('Tax (7%)', '฿114.1', primaryDark),
-                  const SizedBox(height: 12,),
-                  Row(
-                    children: [
-                      SizedBox(width: 120, child: Text('Total', style: TextStyle(color: primaryDark, fontSize: 16, fontWeight: FontWeight.bold))),
-                      Text('฿1744.1', style: TextStyle(color: primaryDark, fontSize: 16)),
+                    const SizedBox(height: 32,),
+                    Text('Purchase', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark),),
+                    const SizedBox(height: 16),
+                    _buildDetailRow('Printing fee', '฿600', primaryDark),
+                    _buildDetailRow('Designer fee', isDesignerOrder ? '฿900' : '-', primaryDark), // ถ้าไม่ใช่ Designer อาจจะขีดแดชไว้
+                    _buildDetailRow('Packaging', '฿70', primaryDark),
+                    _buildDetailRow('Delivery', '฿60', primaryDark),
+                    _buildDetailRow('Tax (7%)', '฿114.1', primaryDark),
+                    const SizedBox(height: 12,),
+                    Row(
+                      children: [
+                        SizedBox(width: 120, child: Text('Total', style: TextStyle(color: primaryDark, fontSize: 16, fontWeight: FontWeight.bold))),
+                        Text('฿1744.1', style: TextStyle(color: primaryDark, fontSize: 16)),
                       ],
-                  ),
-                  const SizedBox(height: 40,),
-                ],
+                    ),
+                    const SizedBox(height: 40,),
+                  ],
+                ),
               ),
-            ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -122,6 +117,53 @@ class ReviewOrderPage extends StatelessWidget {
               ),
         )],
         )),
+    );
+  }
+
+  Widget _buildFileBox (String name, String size, Color primaryOrange, Color primaryDark){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: primaryOrange, width: 1.2)
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.insert_drive_file_outlined, color: primaryOrange, size: 48,),
+          const SizedBox(height: 16,),
+          Expanded(child: Text(name,
+          style: TextStyle(fontWeight: FontWeight.bold, color: primaryDark, fontSize: 16)),
+          ),
+          Text(size, style: TextStyle(
+            color: Colors.grey.shade700, fontWeight: FontWeight.bold, fontSize: 14
+          ),)
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescriptionBox(String description, Color primaryOrange, Color primaryDark){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: primaryOrange, width: 1.2),
+          ),
+          child: Text(description,
+          style: TextStyle(color: primaryDark, fontSize: 14, height: 1.5),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text('Note: Please check all description before sent to designer',
+        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+        textAlign: TextAlign.center,)
+      ],
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'shared_widgets.dart';
+import 'home_page.dart';
 
 class OrderPage extends StatefulWidget {
   const OrderPage({super.key});
@@ -60,18 +61,43 @@ class _OrderPageState extends State<OrderPage> {
       backgroundColor: bgColor,
       body: SafeArea(child: Column(
         children: [
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
           child: Column(
             children: [
               Center(
-                child: Text('Your Orders', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primaryDark),),
+                child: Text('Your Orders', style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: primaryDark,),),
               ),
-              const SizedBox(height: 16,),
+              const SizedBox(height: 24,),
               const CustomSearchBar(hintText: 'Search order...'),
               const SizedBox(height: 20,),
 
-              ProcessingBanner(orderCount: processingOrders.length, progressPercent: 40
-              ),
+              // ProcessingBanner(orderCount: processingOrders.length, progressPercent: 40
+              // ),
+              ValueListenableBuilder<int>(
+                valueListenable: globalActiveOrders,
+                builder: (context, count, child){
+                  if(count == 0){
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: primaryOrange,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: primaryOrange.withOpacity(0.3)),
+                      ),
+                      child: Center(
+                        child: Text('No active orders right now.',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+                  }
+                  return ProcessingBanner(orderCount: count,
+                  progressPercent: 10);
+                })
             ],
             ),
           ),

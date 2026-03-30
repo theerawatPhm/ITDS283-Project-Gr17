@@ -6,6 +6,8 @@ import 'shared_widgets.dart';
 import 'find_store_page.dart';
 import 'find_designer_page.dart';
 
+final ValueNotifier<int> globalActiveOrders = ValueNotifier<int>(0);
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -60,8 +62,30 @@ Widget _buildHomeContent() {
             CustomSearchBar(hintText: 'hintText'),
             // _buildSearchbar(),
             const SizedBox(height: 20),
-            ProcessingBanner(orderCount: 1, progressPercent: 50),
-            const SizedBox(height: 15),
+            // ProcessingBanner(orderCount: 1, progressPercent: 50),
+            ValueListenableBuilder<int>(
+              valueListenable: globalActiveOrders,
+              builder: (context, count, child){
+                if(count == 0){
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: primaryOrange,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: primaryOrange.withOpacity(0.3)),
+                    ),
+                    child: Center(
+                      child: Text('No active orders right now',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                      ),
+                    ),
+                  );
+                }
+                return ProcessingBanner(orderCount: count,
+                progressPercent: 10);
+              }),
+            const SizedBox(height: 30),
             Text(
               'Our Service',
               style: TextStyle(

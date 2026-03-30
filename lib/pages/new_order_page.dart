@@ -59,7 +59,11 @@ class _NewDesignState extends State<NewDesign> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Text('Import Design', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryDark),
+                    Text('Import Design', style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: primaryDark,
+                ),
                     ),
                     Positioned(
                       left: 0,
