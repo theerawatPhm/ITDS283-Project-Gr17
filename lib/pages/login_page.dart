@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
 
 
   void _navigateToHome() {
-    // ไม่ให้ user กดปุ่ม Back กลับมาหน้า Login ได้อีก (ต้อง Logout เท่านั้น)
+    // ไม่ให้ user กดปุ่ม Back กลับมาหน้า Login ได้อีก
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // อิงจากรูป mockup พื้นหลังดูเป็นสีขาวล้วน
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -168,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // --- Widgets ย่อยสำหรับลดความซ้ำซ้อนของโค้ด ---
+ 
 
   
   Widget _buildTextField({
