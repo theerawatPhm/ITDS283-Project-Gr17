@@ -1,5 +1,6 @@
 import 'package:app_3d_now/pages/shared_widgets.dart';
 import 'package:flutter/material.dart';
+import 'payment_page.dart';
 
 class ReviewOrderPage extends StatelessWidget {
 
@@ -107,6 +108,19 @@ class ReviewOrderPage extends StatelessWidget {
                   ),
                   SizedBox(width: 160,height: 50,
                   child: ElevatedButton(onPressed: (){
+                    Map<String , dynamic> orderData ={
+                        'fileName': fileName ?? 'Designer Request',
+                        'designerDescription': designerDescription ?? '',
+                        'material': material,
+                        'quality': quality,
+                        'scrub': scrub,
+                        'color': color,
+                        'requestFile': requestFile,
+                        'otherText': otherText,
+                    };
+                    Navigator.push(context, MaterialPageRoute(builder: (context) =>
+                    PaymentPage(totalAmount: 1777.0, orderDetails: orderData)
+                    ));
 
                   },style: ElevatedButton.styleFrom(
                     backgroundColor: primaryOrange,
