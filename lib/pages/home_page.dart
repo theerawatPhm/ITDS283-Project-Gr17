@@ -5,8 +5,9 @@ import 'new_order_page.dart';
 import 'shared_widgets.dart';
 import 'find_store_page.dart';
 import 'find_designer_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-final ValueNotifier<int> globalActiveOrders = ValueNotifier<int>(0);
+// final ValueNotifier<int> globalActiveOrders = ValueNotifier<int>(0);
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -63,9 +64,21 @@ Widget _buildHomeContent() {
             // _buildSearchbar(),
             const SizedBox(height: 20),
             // ProcessingBanner(orderCount: 1, progressPercent: 50),
-            ValueListenableBuilder<int>(
-              valueListenable: globalActiveOrders,
-              builder: (context, count, child){
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+              .collection('app3dnow_order')
+              .where('status', isEqualTo: 'Processing')
+              .snapshots(),
+              builder: (context, snapshot) {
+                if(snapshot.connectionState == ConnectionState.waiting){
+                  return const SizedBox(
+                    height: 80,
+                    child: Center(child: CircularProgressIndicator(),),
+                  );
+                }
+
+                int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+
                 if(count == 0){
                   return Container(
                     width: double.infinity,
@@ -76,15 +89,17 @@ Widget _buildHomeContent() {
                       border: Border.all(color: primaryOrange.withOpacity(0.3)),
                     ),
                     child: Center(
-                      child: Text('No active orders right now',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                      child: Text(
+                        'No Active Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   );
                 }
-                return ProcessingBanner(orderCount: count,
-                progressPercent: 10);
-              }),
+
+                return ProcessingBanner(
+                  orderCount: count);
+              },
+            ),
             const SizedBox(height: 30),
             Text(
               'Our Service',

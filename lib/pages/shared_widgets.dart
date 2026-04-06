@@ -51,76 +51,42 @@ class CustomSearchBar extends StatelessWidget {
 }
 
 class ProcessingBanner extends StatelessWidget {
-
   final int orderCount;
-  final int progressPercent;
 
-  const ProcessingBanner({super.key, required this.orderCount, required this.progressPercent});
+  const ProcessingBanner({super.key, required this.orderCount});
 
   @override
   Widget build(BuildContext context) {
-    const double maxBarWidth = 150;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(30),
+      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24), 
       decoration: BoxDecoration(
         color: primaryOrange,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
+
+        crossAxisAlignment: CrossAxisAlignment.center, 
         children: [
           Expanded(
             flex: 2,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('$orderCount order is processing', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),
-                const SizedBox(height: 65,),
-                Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    Container(
-                      height: 8,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(4)
-                      ),
-                    ),
-                    Container( //หลอด % สีขาว
-                      height: 8,
-                      width: maxBarWidth * (progressPercent / 100),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    Positioned(
-                      top: -35,
-                      //have to make it movable
-                      left: (maxBarWidth * (progressPercent / 100 )) - 25,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text('$progressPercent%', style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            child: Text(
+              '$orderCount order${orderCount > 1 ? 's' : ''} processing', 
+              style: const TextStyle(
+                color: Colors.white, 
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                height: 1.3, 
+              ),
             ),
           ),
           Expanded(
             flex: 1,
             child: Center(
-              child: Image.asset('assets/icons/constructionTwo.png',
-              width: 80,
-              height: 80,
+              child: Image.asset(
+                'assets/icons/constructionTwo.png',
+                width: 80,
+                height: 80,
               ),
             ),
           ),

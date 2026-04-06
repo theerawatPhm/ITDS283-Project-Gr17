@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'shared_widgets.dart';
 import 'home_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OrderPage extends StatefulWidget {
   const OrderPage({super.key});
@@ -16,45 +19,45 @@ class _OrderPageState extends State<OrderPage> {
   final Color bgColor = const Color(0xFFF8F8F8);
   final Color successGreen = const Color(0xFF4CAF50);
 
-  final List<Map<String, dynamic>> allOrder =[{
+  // final List<Map<String, dynamic>> allOrder =[{
 
-    'status': 'Processing',
-    'material' : 'PLA',
-    'quality' : 'Mid',
-    'scrub' : 'No',
-    'color' : 'Filament Color',
-    'file' : 'No',
-    'other' : 'No',
-    'icon' : Icons.local_shipping,
-    },
+  //   'status': 'Processing',
+  //   'material' : 'PLA',
+  //   'quality' : 'Mid',
+  //   'scrub' : 'No',
+  //   'color' : 'Filament Color',
+  //   'file' : 'No',
+  //   'other' : 'No',
+  //   'icon' : Icons.local_shipping,
+  //   },
 
-    {
-    'status': 'Processing',
-    'material' : 'Resin',
-    'quality' : 'High',
-    'scrub' : 'Yes',
-    'color' : 'spray',
-    'file' : 'No',
-    'other' : 'No',
-    'icon' : Icons.medication,
-    },
+  //   {
+  //   'status': 'Processing',
+  //   'material' : 'Resin',
+  //   'quality' : 'High',
+  //   'scrub' : 'Yes',
+  //   'color' : 'spray',
+  //   'file' : 'No',
+  //   'other' : 'No',
+  //   'icon' : Icons.medication,
+  //   },
 
-    {
-    'status': 'Complete',
-    'material' : 'Resin',
-    'quality' : 'High',
-    'scrub' : 'Yes',
-    'color' : 'spray',
-    'file' : 'No',
-    'other' : 'No',
-    'icon' : Icons.medication,
-    }
-  ];
+  //   {
+  //   'status': 'Complete',
+  //   'material' : 'Resin',
+  //   'quality' : 'High',
+  //   'scrub' : 'Yes',
+  //   'color' : 'spray',
+  //   'file' : 'No',
+  //   'other' : 'No',
+  //   'icon' : Icons.medication,
+  //   }
+  // ];
 
   @override
   Widget build(BuildContext context) {
-    final processingOrders = allOrder.where((order) => order['status'] == 'Processing').toList();
-    final completeOrders = allOrder.where((order) => order['status'] == 'Complete').toList();
+    // final processingOrders = allOrder.where((order) => order['status'] == 'Processing').toList();
+    // final completeOrders = allOrder.where((order) => order['status'] == 'Complete').toList();
 
     return DefaultTabController(length: 3,
     child: Scaffold(
@@ -76,28 +79,42 @@ class _OrderPageState extends State<OrderPage> {
 
               // ProcessingBanner(orderCount: processingOrders.length, progressPercent: 40
               // ),
-              ValueListenableBuilder<int>(
-                valueListenable: globalActiveOrders,
-                builder: (context, count, child){
-                  if(count == 0){
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: primaryOrange,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: primaryOrange.withOpacity(0.3)),
+              StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+              .collection('app3dnow_order')
+              .where('status', isEqualTo: 'Processing')
+              .snapshots(),
+              builder: (context, snapshot) {
+                if(snapshot.connectionState == ConnectionState.waiting){
+                  return const SizedBox(
+                    height: 80,
+                    child: Center(child: CircularProgressIndicator(),),
+                  );
+                }
+
+                int count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+
+                if(count == 0){
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: primaryOrange,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: primaryOrange.withOpacity(0.3)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'No Active Order', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      child: Center(
-                        child: Text('No active orders right now.',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    );
-                  }
-                  return ProcessingBanner(orderCount: count,
-                  progressPercent: 10);
-                })
+                    ),
+                  );
+                }
+
+                return ProcessingBanner(
+                  orderCount: count,);
+              },
+            ),
             ],
             ),
           ),
@@ -113,18 +130,50 @@ class _OrderPageState extends State<OrderPage> {
             ]
           ),
         Expanded(
-          child: TabBarView(
-            children: [
-              _buildOrderList(allOrder),
-              _buildOrderList(processingOrders),
-              _buildOrderList(completeOrders)
-            ])),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('app3dnow_order').orderBy('createdAt', descending: true)
+            .snapshots(),
+            builder: (context, snapshot){
+              if(snapshot.connectionState == ConnectionState.waiting){
+                return Center(child: CircularProgressIndicator(color: primaryOrange,));
+              }
+
+              if(snapshot.hasError){
+                return Center(child: Text('Error', style: const TextStyle(color: Colors.red)));
+              }
+
+              if(!snapshot.hasData || snapshot.data!.docs.isEmpty){
+                return const Center(child: Text('No orders found', style: TextStyle(color: Colors.grey, fontSize: 16),));
+              }
+
+              final allOrders = snapshot.data!.docs.map((doc){
+                return doc.data() as Map<String, dynamic>;
+              }).toList();
+
+              final processingOrders = allOrders.where((order) => order['status'] == 'Processing').toList();
+              final completeOrders = allOrders.where((order) => order['status'] == 'Complete').toList();
+              
+              return TabBarView(
+                children: [
+                  _buildOrderList(allOrders),
+                  _buildOrderList(processingOrders),
+                  _buildOrderList(completeOrders),
+                ]);
+            },
+            
+          ),
+          ),
         ],
       )),
     ));
   }
 
   Widget _buildOrderList(List<Map<String, dynamic>> orders){
+
+    if(orders.isEmpty){
+      return const Center(child: Text('No orders', style:  TextStyle(color: Colors.grey),));
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(24.0),
       itemCount: orders.length,
@@ -135,8 +184,13 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   Widget _buildOrderCard(Map<String, dynamic> order){
-    final bool isComplete = order['status'] == ['Complete'].toList();
+    final bool isComplete = order['status'] == 'Complete';
     final Color statusColor = isComplete ? successGreen : primaryOrange;
+
+    IconData displayIcon = Icons.print;
+    if(order['iconPath'] == 'designer_icon'){
+      displayIcon = Icons.design_services;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -165,16 +219,17 @@ class _OrderPageState extends State<OrderPage> {
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Model order detail', 
-                    style: TextStyle(fontWeight: FontWeight.bold,
-                        color: primaryDark, fontSize: 14),),
+                  Text(order['filename'] ?? order ['designerdescription'] ?? 'Model Order',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold, color: primaryDark, fontSize: 14),),
                   const SizedBox(height: 8),
-                  _buildDetailText('Material:', order['material']),
-                  _buildDetailText('Quality', order['quality']),
-                  _buildDetailText('Scrub', order['scrub']),
-                  _buildDetailText('Color', order['color']),
-                  _buildDetailText('File', order['file']),
-                  _buildDetailText('Other', order['other']),
+                  _buildDetailText('Material:', order['material'] ?? '-'),
+                  _buildDetailText('Quality', order['quality'] ?? '-'),
+                  _buildDetailText('Scrub', order['scrub'] ?? '-'),
+                  _buildDetailText('Color', order['color'] ?? '-'),
+                  _buildDetailText('File', order['file'] ?? '-'),
+                  _buildDetailText('Other', order['other'] ?? '-'),
                 ],
               ),
               ),
@@ -213,7 +268,7 @@ class _OrderPageState extends State<OrderPage> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: primaryOrange,
                       side: BorderSide(color: primaryOrange),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ), child: const Text('Review', style: TextStyle(fontSize: 12),))
                   ],
                 )
@@ -232,7 +287,8 @@ class _OrderPageState extends State<OrderPage> {
         children: [
           SizedBox(width: 60, child: Text(label,
             style: const TextStyle(fontSize: 10, color: Colors.grey))),
-            Text(value, style: TextStyle(fontSize: 10, color: primaryDark)),
+            Expanded(child: Text(value, style: TextStyle(fontSize: 10, color: primaryDark),
+            maxLines: 1, overflow: TextOverflow.ellipsis,),)
         ],
       ),
       );

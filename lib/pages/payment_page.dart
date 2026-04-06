@@ -40,7 +40,7 @@ class _PaymentPageState extends State<PaymentPage> {
 
       await FirebaseFirestore.instance.collection('app3dnow_order').add(finalOrderData);
 
-      globalActiveOrders.value += 1;
+      // globalActiveOrders.value += 1;
       
       if (!mounted) return; 
       setState(() => _isLoading = false);

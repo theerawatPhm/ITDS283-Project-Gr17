@@ -280,5 +280,4 @@ class _NewDesignState extends State<NewDesign> {
       ],
     );
   }
-
 }
