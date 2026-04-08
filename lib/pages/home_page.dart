@@ -51,7 +51,7 @@ Widget _buildHomeContent() {
           children: [
             Center(
               child: Text(
-                'Welcome User',
+                '3D NOW',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,

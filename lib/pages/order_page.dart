@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'shared_widgets.dart';
 import 'home_page.dart';
@@ -246,6 +244,15 @@ class _OrderPageState extends State<OrderPage> {
       displayIcon = Icons.design_services;
     }
 
+    String rawFileName = order['fileName'] ?? '';
+    String displayTitle = rawFileName;
+
+    if(displayTitle.contains('.')){
+      displayTitle = displayTitle.substring(0, displayTitle.lastIndexOf('.'));
+    }
+    //emergency case naka
+    if(displayTitle.isEmpty) displayTitle = 'Model Order';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -266,24 +273,24 @@ class _OrderPageState extends State<OrderPage> {
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(order['icon'], size: 40, color: Colors.blueGrey),
+                child: Icon(displayIcon, size: 40, color: Colors.blueGrey),
               ),
               const SizedBox(width: 16),
 
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(order['filename'] ?? order ['designerdescription'] ?? 'Model Order',
+                  Text(displayTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.bold, color: primaryDark, fontSize: 14),),
                   const SizedBox(height: 8),
                   _buildDetailText('Material:', order['material'] ?? '-'),
-                  _buildDetailText('Quality', order['quality'] ?? '-'),
-                  _buildDetailText('Scrub', order['scrub'] ?? '-'),
-                  _buildDetailText('Color', order['color'] ?? '-'),
-                  _buildDetailText('File', order['file'] ?? '-'),
-                  _buildDetailText('Other', order['other'] ?? '-'),
+                  _buildDetailText('Quality:', order['quality'] ?? '-'),
+                  _buildDetailText('Scrub:', order['scrub'] ?? '-'),
+                  _buildDetailText('Color:', order['color'] ?? '-'),
+                  _buildDetailText('File:', (rawFileName.isNotEmpty && rawFileName !=  'Designer Request') ? rawFileName : '-'),
+                  _buildDetailText('Other:', order['otherText'] ?? order['other'] ?? '-'),
                 ],
               ),
               ),
@@ -294,19 +301,22 @@ class _OrderPageState extends State<OrderPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(order['status'],
+              Text(order['status'] ?? 'Unknown',
               style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 14),
               ),
               if(!isComplete)...[
-                OutlinedButton(
-                  onPressed: ()=> _showCancelDialog(context, order['id']),
-                  style: OutlinedButton.styleFrom(foregroundColor: primaryOrange,
-                  side: BorderSide(color: primaryOrange),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                Row(
+                  children: [
+                    OutlinedButton(
+                      onPressed: ()=> _showCancelDialog(context, order['id']),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        padding: EdgeInsets.zero
+                      ),
+                child: const Text('Cancel', style: TextStyle(color: Colors.black54)),
                   ),
-                child: const Text('Cancel'),
-                ),
-                const SizedBox(width: 1,),
+                const SizedBox(width: 10),
                 ElevatedButton(onPressed: ()=> _showCompleteDialog(context, order['id']),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: successGreen,
@@ -315,24 +325,27 @@ class _OrderPageState extends State<OrderPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 20)
                 ),
                  child: const Text('Complete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)),
+                  ],
+                )
               ]else ...[
                 Row(
                   children: [
                     OutlinedButton(
                       onPressed: () => _showCancelDialog(context, order['id']),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.grey.shade600,
-                        side: BorderSide(color: Colors.grey.shade400),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      ), child: const Text('Remove', style: TextStyle(fontSize: 12)),
+                        side: BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(20)),
+                        minimumSize: Size(80, 39),
+                        padding: EdgeInsets.zero
+                      ), child: const Text('Remove', style: TextStyle(color: Colors.black54),),
                     ),
-                    const SizedBox(width: 8,),
+                    const SizedBox(width: 10,),
                     OutlinedButton(onPressed: (){},
                     style: OutlinedButton.styleFrom(
                       foregroundColor: primaryOrange,
                       side: BorderSide(color: primaryOrange),
-                      
-                    ), child: const Text('Review', style: TextStyle(fontSize: 12),))
+                      backgroundColor: primaryOrange
+                    ), child: const Text('Review', style: TextStyle(color: Colors.white),))
                   ],
                 )
               ]
