@@ -78,40 +78,33 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 
-  // final List<Map<String, dynamic>> allOrder =[{
-
-  //   'status': 'Processing',
-  //   'material' : 'PLA',
-  //   'quality' : 'Mid',
-  //   'scrub' : 'No',
-  //   'color' : 'Filament Color',
-  //   'file' : 'No',
-  //   'other' : 'No',
-  //   'icon' : Icons.local_shipping,
-  //   },
-
-  //   {
-  //   'status': 'Processing',
-  //   'material' : 'Resin',
-  //   'quality' : 'High',
-  //   'scrub' : 'Yes',
-  //   'color' : 'spray',
-  //   'file' : 'No',
-  //   'other' : 'No',
-  //   'icon' : Icons.medication,
-  //   },
-
-  //   {
-  //   'status': 'Complete',
-  //   'material' : 'Resin',
-  //   'quality' : 'High',
-  //   'scrub' : 'Yes',
-  //   'color' : 'spray',
-  //   'file' : 'No',
-  //   'other' : 'No',
-  //   'icon' : Icons.medication,
-  //   }
-  // ];
+  void _showCompleteDialog(BuildContext context, String docId){
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)),
+          title: Text('Complete Order?', style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold)),
+          content: const Text('Are you sure you want to mark this order as complete?'),
+          backgroundColor: Colors.white,
+          actions: [
+            TextButton(
+              onPressed: ()=> Navigator.pop(context),
+              child: const Text('Cancle', style: TextStyle(color: Colors.grey)),
+              ),
+            ElevatedButton(
+              onPressed: (){
+                _completeOrder(docId);
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: successGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text('Yes, Complete', style: TextStyle(color: Colors.white),))
+          ],
+      ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +199,9 @@ class _OrderPageState extends State<OrderPage> {
               }
 
               final allOrders = snapshot.data!.docs.map((doc){
-                return doc.data() as Map<String, dynamic>;
+                Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                data['id'] = doc.id;
+                return data;
               }).toList();
 
               final processingOrders = allOrders.where((order) => order['status'] == 'Processing').toList();
@@ -304,30 +299,39 @@ class _OrderPageState extends State<OrderPage> {
               ),
               if(!isComplete)...[
                 OutlinedButton(
-                  onPressed: (){},
+                  onPressed: ()=> _showCancelDialog(context, order['id']),
                   style: OutlinedButton.styleFrom(foregroundColor: primaryOrange,
                   side: BorderSide(color: primaryOrange),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                child: const Text('Contact Us'),
+                child: const Text('Cancel'),
                 ),
+                const SizedBox(width: 1,),
+                ElevatedButton(onPressed: ()=> _showCompleteDialog(context, order['id']),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: successGreen,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 20)
+                ),
+                 child: const Text('Complete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),)),
               ]else ...[
                 Row(
                   children: [
                     OutlinedButton(
-                      onPressed: (){},
+                      onPressed: () => _showCancelDialog(context, order['id']),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.grey.shade600,
                         side: BorderSide(color: Colors.grey.shade400),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      ), child: const Text('Hide this order', style: TextStyle(fontSize: 12)),
+                      ), child: const Text('Remove', style: TextStyle(fontSize: 12)),
                     ),
                     const SizedBox(width: 8,),
                     OutlinedButton(onPressed: (){},
                     style: OutlinedButton.styleFrom(
                       foregroundColor: primaryOrange,
                       side: BorderSide(color: primaryOrange),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      
                     ), child: const Text('Review', style: TextStyle(fontSize: 12),))
                   ],
                 )
