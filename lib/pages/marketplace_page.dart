@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'find_store_page.dart'; 
+import 'find_store_page.dart';
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -14,6 +13,8 @@ class _MarketplacePageState extends State<MarketplacePage> {
   final Color primaryOrange = const Color.fromARGB(232, 202, 86, 44);
   final Color bgColor = const Color(0xFFF8F8F8);
 
+  bool isModelSelected = true;
+
   // mock data
   final List<Map<String, dynamic>> mockModels = [
     {
@@ -24,7 +25,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
       'image': 'assets/img/clock.jpg',
     },
     {
-      'title': 'Mac Mock Up',
+      'title': 'iMac Mock Up',
       'material': 'PLA',
       'time': '1 Day',
       'price': 800,
@@ -33,7 +34,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
     {
       'title': 'Car',
       'material': 'Resin',
-      'time': '2 Days',
+      'time': '5 hrs',
       'price': 500,
       'image': 'assets/img/car.jpg',
     },
@@ -79,31 +80,70 @@ class _MarketplacePageState extends State<MarketplacePage> {
       ),
       body: Column(
         children: [
-          // ปุ่ม Toggle
+          
+          // แถบ Toggle
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Container(
-              height: 40,
+              height: 45,
               decoration: BoxDecoration(
-                border: Border.all(color: primaryOrange),
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: primaryOrange, width: 1.5),
               ),
               child: Row(
                 children: [
+                  
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: primaryOrange,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Center(
-                        child: Text('Model', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isModelSelected = true;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isModelSelected ? primaryOrange : Colors.transparent,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Model',
+                            style: TextStyle(
+                              color: isModelSelected ? Colors.white : primaryOrange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                  
+                  
                   Expanded(
-                    child: Center(
-                      child: Text('Select', style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold)),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isModelSelected = false;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: !isModelSelected ? primaryOrange : Colors.transparent,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Select',
+                            style: TextStyle(
+                              color: !isModelSelected ? Colors.white : primaryOrange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -112,7 +152,9 @@ class _MarketplacePageState extends State<MarketplacePage> {
           ),
           const SizedBox(height: 10),
 
-          //grid show product list
+          // ----------------------------------------------------
+          // Grid แสดงรายการสินค้า
+          // ----------------------------------------------------
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
@@ -127,7 +169,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                 final model = mockModels[index];
                 return GestureDetector(
                   onTap: () {
-                    //preview
+                    
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -138,47 +180,50 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.grey.shade300, width: 1),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // รูปภาพโมเดล
+                        
                         Expanded(
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                            child: Container(
-                              width: double.infinity,
-                              color: Colors.grey.shade100,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                               child: Image.asset(
                                 model['image'],
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) => 
                                   const Icon(Icons.image, size: 50, color: Colors.grey),
                               ),
                             ),
                           ),
                         ),
-                        // รายละเอียด
+                        
                         Padding(
-                          padding: const EdgeInsets.all(12.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 model['title'],
-                                style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 14),
+                                style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
-                              Text('Material: ${model['material']}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                              Text('Time: ${model['time']}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 2),
+                              Text('Material: ${model['material']}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+                              Text('Time: ${model['time']}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+                              const SizedBox(height: 2),
                               Text(
                                 'Price ฿${model['price']}',
-                                style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold, fontSize: 12),
+                                style: TextStyle(color: Colors.grey.shade800, fontSize: 11),
                               ),
                             ],
                           ),
@@ -191,11 +236,10 @@ class _MarketplacePageState extends State<MarketplacePage> {
             ),
           ),
           
-          
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '6/16 Items Viewed',
+              '6 / 6 Items Viewed',
               style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
             ),
           )
@@ -243,7 +287,7 @@ class ModelPreviewPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  //preview pic
+                  // preview pic
                   Container(
                     width: double.infinity,
                     height: 250,
@@ -264,11 +308,9 @@ class ModelPreviewPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
                   
-
                   Text('Model Order Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark)),
                   const SizedBox(height: 16),
                   
-
                   _buildDetailRow('Material:', modelData['material'], primaryDark),
                   _buildDetailRow('Quality:', 'Mid', primaryDark),
                   _buildDetailRow('Scrub:', 'No', primaryDark),
@@ -288,7 +330,6 @@ class ModelPreviewPage extends StatelessWidget {
               ),
             ),
           ),
-          
           
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -334,7 +375,7 @@ class ModelPreviewPage extends StatelessWidget {
     );
   }
 
-  //detail
+  // detail
   Widget _buildDetailRow(String label, String value, Color primaryDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
