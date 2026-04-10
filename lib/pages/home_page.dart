@@ -5,6 +5,7 @@ import 'new_order_page.dart';
 import 'shared_widgets.dart';
 import 'find_store_page.dart';
 import 'find_designer_page.dart';
+import 'marketplace_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // final ValueNotifier<int> globalActiveOrders = ValueNotifier<int>(0);
@@ -240,38 +241,43 @@ Widget _buildHomeContent() {
 
   //WIDGET HERE
 Widget _buildServicesList() {
-    final services = ['Print Stores', 'Find Designer', 'Marketplace',];
+    final services = ['Print Stores', 'Find Designer', 'Marketplace'];
+    
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: services.map((services) {
+        children: services.map((service) {
           return Padding(
             padding: const EdgeInsets.only(right: 12.0),
             child: GestureDetector(
               onTap: () {
-
-                print('On tap test ${services}');
-                if (services == 'Find Designer'){
+                //go to each page
+                print('On tap test $service');
+                
+                if (service == 'Find Designer') {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const FindDesignerPage()));
-                }else if(services == 'Print Stores'){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FindStorePage()));}
-                  },
+                } else if (service == 'Print Stores') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FindStorePage()));
+                } else if (service == 'Marketplace') {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const MarketplacePage()));
+                }
+              },
               child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                border: Border.all(color: primaryDark, width: 1),
-              ),
-              child: Text(
-                services,
-                style: TextStyle(
-                  color: primaryDark,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: primaryDark, width: 1),
+                ),
+                child: Text(
+                  service,
+                  style: TextStyle(
+                    color: primaryDark,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
             ),
           );
         }).toList(),
