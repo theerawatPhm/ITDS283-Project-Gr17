@@ -30,7 +30,7 @@ class _NewDesignState extends State<NewDesign> {
   final TextEditingController _otherController = TextEditingController();
 
   Future<void> _pickFile() async{
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    FilePickerResult? result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['stl', 'obj', 'gcode'],
     );
