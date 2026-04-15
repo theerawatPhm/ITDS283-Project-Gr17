@@ -25,42 +25,42 @@ class _MarketplacePageState extends State<MarketplacePage> {
       'material': 'PLA',
       'time': '1 Day',
       'price': 350,
-      'image': 'assets/img/clock.jpg',
+      'image': 'assets/img/clock.png',
     },
     {
-      'title': 'iMac Mock Up',
+      'title': 'Computer Mock Up',
       'material': 'PLA',
       'time': '1 Day',
       'price': 800,
-      'image': 'assets/img/mac.jpg',
+      'image': 'assets/img/computer.png',
     },
     {
       'title': 'Car',
       'material': 'Resin',
       'time': '5 hrs',
       'price': 500,
-      'image': 'assets/img/car.jpg',
+      'image': 'assets/img/car.png',
     },
     {
       'title': 'Truck',
       'material': 'PLA',
       'time': '1 Day',
       'price': 650,
-      'image': 'assets/img/truck.jpg',
+      'image': 'assets/img/truck.png',
     },
     {
       'title': 'Telescope',
       'material': 'PLA',
       'time': '1 Day',
       'price': 450,
-      'image': 'assets/img/telescope.jpg',
+      'image': 'assets/img/telescope.png',
     },
     {
       'title': 'Rocking Horse',
       'material': 'PLA',
       'time': '1 Day',
       'price': 1200,
-      'image': 'assets/img/horse.jpg',
+      'image': 'assets/img/toy01.png',
     },
   ];
 
@@ -82,7 +82,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
     });
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
@@ -101,7 +101,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
       ),
       body: Column(
         children: [
-          // 🔴 1. โครงสร้าง Search Bar ที่ถูกต้อง (มี Row ครอบ และ Expanded ดันปุ่ม)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Container(
@@ -146,11 +145,20 @@ class _MarketplacePageState extends State<MarketplacePage> {
             ),
           ),
           const SizedBox(height: 10),
-          // แถบ Toggle
 
-          // Grid แสดงรายการสินค้า
           Expanded(
-            child: GridView.builder(
+            child: displayModels.isEmpty 
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 60, color: Colors.grey.shade400),
+                    const SizedBox(height: 16),
+                    Text('No results found', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                  ],
+                ),
+              )
+            : GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -158,12 +166,13 @@ class _MarketplacePageState extends State<MarketplacePage> {
                 mainAxisSpacing: 16,
                 childAspectRatio: 0.75,
               ),
-              itemCount: mockModels.length,
+
+              itemCount: displayModels.length,
               itemBuilder: (context, index) {
-                final model = mockModels[index];
+
+                final model = displayModels[index]; 
                 return GestureDetector(
                   onTap: () {
-                    
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -180,13 +189,12 @@ class _MarketplacePageState extends State<MarketplacePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        
                         Expanded(
                           child: Container(
                             width: double.infinity,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: Colors.white,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                             ),
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -199,7 +207,6 @@ class _MarketplacePageState extends State<MarketplacePage> {
                             ),
                           ),
                         ),
-                        
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                           child: Column(
@@ -233,7 +240,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              '6 / 6 Items Viewed',
+              '${displayModels.length} Items Found',
               style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
             ),
           )
@@ -243,7 +250,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
   }
 }
 
-// หน้า Preview Model (productToPurchase) เด้งขึ้นมาเมื่อกดเลือกโมเดล
+//model pre view page
 
 class ModelPreviewPage extends StatelessWidget {
   final Map<String, dynamic> modelData;
