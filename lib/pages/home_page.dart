@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 
 import 'order_page.dart';
@@ -7,8 +9,8 @@ import 'find_store_page.dart';
 import 'find_designer_page.dart';
 import 'marketplace_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-// final ValueNotifier<int> globalActiveOrders = ValueNotifier<int>(0);
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -42,6 +44,97 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
+ 
+void _showProfileModal(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
+          builder: (context, snapshot) {
+            
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                height: 300,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF8F8F8), 
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(40))
+                ),
+                child: const Center(child: CircularProgressIndicator())
+              );
+            }
+
+            var userData = snapshot.data!.data() as Map<String, dynamic>;
+            String name = userData['name'] ?? 'No Name';
+            String email = userData['email'] ?? 'No Email';
+            String role = userData['role'] ?? 'customer';
+
+            return Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF8F8F8),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40)), 
+              ),
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 50,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Icon(Icons.account_circle, size: 80, color: primaryDark,),
+                  const SizedBox(height: 16,),
+                  Text(name, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: primaryDark)),
+                  Text(email, style: TextStyle(fontSize: 14, color: primaryDark)),
+                  const SizedBox(height: 20,),
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: primaryOrange, width: 1.5),
+                    ),
+                    child: Text(role.toUpperCase(), style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold)
+                    ),
+                  ),
+                  const SizedBox(height: 30,),
+                  SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          if (mounted) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (context) => const LoginPage()), 
+                              (Route<dynamic> route) => false,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryOrange,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30))
+                        ),
+                        child: const Text('Log Out', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
+                      ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      });
+  }
 
 Widget _buildHomeContent() {
     return SafeArea(
@@ -50,15 +143,19 @@ Widget _buildHomeContent() {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Text(
-                '3D NOW',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(width: 48,),
+                Text('3D NOW', 
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: primaryDark,
+                  fontSize: 28, 
+                  fontWeight: FontWeight.bold,
+                  color: primaryDark
                 ),
-              ),
+                ),
+                IconButton(onPressed: ()=> _showProfileModal(context), icon: Icon(Icons.account_circle), iconSize: 35,)
+              ],
             ),
             const SizedBox(height: 24),
             CustomSearchBar(hintText: 'hintText'),
@@ -129,115 +226,6 @@ Widget _buildHomeContent() {
     );
   }
 
-  // Widget _buildSearchbar() {
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(30),
-  //       border: Border.all(color: primaryDark, width: 1.5),
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         const Padding(
-  //           padding: EdgeInsets.only(left: 10, right: 8, top: 5, bottom: 5),
-  //           child: Icon(Icons.search, color: Color(0xFF4A3B52), size: 45),
-  //           ),
-  //         Expanded(
-  //           child: TextField(
-  //             decoration: InputDecoration(
-  //             hintText: 'Search...',
-  //             border: InputBorder.none,
-  //             hintStyle: const TextStyle(color: Color(0xFF4A3B52), fontSize: 20),
-  //             ),
-  //           ),
-  //         ),
-  //         Padding(
-  //           padding: const EdgeInsets.all(4.0),
-  //           child: ElevatedButton(onPressed: (){},
-  //           style: ElevatedButton.styleFrom(
-  //             backgroundColor: primaryDark,
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(24),
-  //             ),
-  //             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-  //             elevation: 0,
-  //           ),
-  //           child: const Text('Enter', style: TextStyle(color: Colors.white),),),),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildProcessingBanner(){
-  //   return Container(
-  //     width: double.infinity,
-  //     padding: const EdgeInsets.all(30),
-  //     decoration: BoxDecoration(
-  //       color: primaryOrange,
-  //       borderRadius: BorderRadius.circular(20),
-  //     ),
-  //     child: Row(
-  //       children: [
-  //         Expanded(
-  //           flex: 2,
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               const Text('X order is processing', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),
-  //               const SizedBox(height: 65,),
-  //               Stack(
-  //                 clipBehavior: Clip.none,
-  //                 alignment: Alignment.centerLeft,
-  //                 children: [
-  //                   Container(
-  //                     height: 8,
-  //                     width: double.infinity,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.black.withOpacity(0.2),
-  //                       borderRadius: BorderRadius.circular(4)
-  //                     ),
-  //                   ),
-  //                   Container(
-  //                     height: 8,
-  //                     width: 150,
-  //                     decoration: BoxDecoration(
-  //                       color: Colors.white,
-  //                       borderRadius: BorderRadius.circular(4),
-  //                     ),
-  //                   ),
-  //                   Positioned(
-  //                     top: -35,
-  //                     //have to make it movable
-  //                     left: 125,
-  //                     child: Container(
-  //                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-  //                       decoration: BoxDecoration(
-  //                         color: Colors.white,
-  //                         borderRadius: BorderRadius.circular(12),
-  //                       ),
-  //                       child: Text('%X', style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold, fontSize: 15),
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //         Expanded(
-  //           flex: 1,
-  //           child: Center(
-  //             child: SvgPicture.asset('assets/icons/constructionTwo.svg',
-  //             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn,),
-  //             width: 80,
-  //             height: 80,
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   //WIDGET HERE
 Widget _buildServicesList() {
