@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'shared_widgets.dart';
 import 'home_page.dart';
@@ -134,6 +135,7 @@ class _OrderPageState extends State<OrderPage> {
               stream: FirebaseFirestore.instance
               .collection('app3dnow_order')
               .where('status', isEqualTo: 'Processing')
+              .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
               .snapshots(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.waiting){
@@ -182,7 +184,10 @@ class _OrderPageState extends State<OrderPage> {
           ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection('app3dnow_order').orderBy('createdAt', descending: true)
+            stream: FirebaseFirestore.instance
+            .collection('app3dnow_order')
+            .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+            .orderBy('createdAt', descending: true)
             .snapshots(),
             builder: (context, snapshot){
               if(snapshot.connectionState == ConnectionState.waiting){
@@ -190,7 +195,10 @@ class _OrderPageState extends State<OrderPage> {
               }
 
               if(snapshot.hasError){
-                return Center(child: Text('Error', style: const TextStyle(color: Colors.red)));
+                return Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(child: SelectableText('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red))),
+                );
               }
 
               if(!snapshot.hasData || snapshot.data!.docs.isEmpty){

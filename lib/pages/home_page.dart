@@ -166,6 +166,7 @@ Widget _buildHomeContent() {
               stream: FirebaseFirestore.instance
               .collection('app3dnow_order')
               .where('status', isEqualTo: 'Processing')
+              .where('userId', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
               .snapshots(),
               builder: (context, snapshot) {
                 if(snapshot.connectionState == ConnectionState.waiting){

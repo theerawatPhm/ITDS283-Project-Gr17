@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'home_page.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -36,6 +37,7 @@ class _PaymentPageState extends State<PaymentPage> {
         'status' : 'Processing',
         'createdAt' : FieldValue.serverTimestamp(),
         'iconPath' : hasDesigner ? 'designer_icon' : 'printer_icon',
+        'userId' : FirebaseAuth.instance.currentUser?.uid,
       };
 
       await FirebaseFirestore.instance.collection('app3dnow_order').add(finalOrderData);
