@@ -1,5 +1,8 @@
+import 'package:app_3d_now/pages/add_model_page.dart';
 import 'package:flutter/material.dart';
 import 'find_store_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -13,76 +16,29 @@ class _MarketplacePageState extends State<MarketplacePage> {
   final Color primaryOrange = const Color.fromARGB(232, 202, 86, 44);
   final Color bgColor = const Color(0xFFF8F8F8);
 
-  bool isModelSelected = true;
-
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> displayModels = [];
-
-  // mock data
-  final List<Map<String, dynamic>> mockModels = [
-    {
-      'title': 'Clock',
-      'material': 'PLA',
-      'time': '1 Day',
-      'price': 350,
-      'image': 'assets/img/clock.png',
-    },
-    {
-      'title': 'Computer Mock Up',
-      'material': 'PLA',
-      'time': '1 Day',
-      'price': 800,
-      'image': 'assets/img/computer.png',
-    },
-    {
-      'title': 'Car',
-      'material': 'Resin',
-      'time': '5 hrs',
-      'price': 500,
-      'image': 'assets/img/car.png',
-    },
-    {
-      'title': 'Truck',
-      'material': 'PLA',
-      'time': '1 Day',
-      'price': 650,
-      'image': 'assets/img/truck.png',
-    },
-    {
-      'title': 'Telescope',
-      'material': 'PLA',
-      'time': '1 Day',
-      'price': 450,
-      'image': 'assets/img/telescope.png',
-    },
-    {
-      'title': 'Rocking Horse',
-      'material': 'PLA',
-      'time': '1 Day',
-      'price': 1200,
-      'image': 'assets/img/toy01.png',
-    },
-  ];
+  String _userRole = 'customer';
+  String _searchKeyword = '';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    displayModels = List.from(mockModels);
+    _checkUserRole();
   }
 
-  void _runsearch(String enteredKeyword){
-    List<Map<String, dynamic>> results = [];
-    if(enteredKeyword.isEmpty){
-      results = List.from(mockModels);
-    }else{
-      results = mockModels.where((model) => model['title'].toString().toLowerCase().contains(enteredKeyword.toLowerCase())).toList();
+  Future<void> _checkUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (userDoc.exists && mounted) {
+        setState(() {
+          _userRole = userDoc.get('role') ?? 'customer';
+        });
+      }
     }
-    setState(() {
-      displayModels = results;
-    });
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
@@ -99,8 +55,19 @@ class _MarketplacePageState extends State<MarketplacePage> {
         ),
         centerTitle: true,
       ),
+      floatingActionButton: _userRole == 'designer'
+          ? FloatingActionButton(
+              backgroundColor: primaryOrange,
+              elevation: 4,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              child: const Icon(Icons.add, color: Colors.white, size: 30,),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AddModelPage()));
+              })
+          : null,
       body: Column(
         children: [
+          //search box
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Container(
@@ -114,7 +81,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      onChanged: (value) => _runsearch(value),
+                      onChanged: (value) => setState(() => _searchKeyword = value.toLowerCase()), 
                       decoration: InputDecoration(
                         hintText: 'Search for models...',
                         hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16,),
@@ -124,134 +91,147 @@ class _MarketplacePageState extends State<MarketplacePage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: ElevatedButton(
-                      onPressed: () => _runsearch(_searchController.text),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryOrange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      ),
-                      child: const Text(
-                        'Search',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 10),
 
+          //pull from fireBase
           Expanded(
-            child: displayModels.isEmpty 
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.search_off, size: 60, color: Colors.grey.shade400),
-                    const SizedBox(height: 16),
-                    Text('No results found', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
-                  ],
-                ),
-              )
-            : GridView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.75,
-              ),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('app3dnow_marketplace')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator(color: primaryOrange));
+                }
 
-              itemCount: displayModels.length,
-              itemBuilder: (context, index) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 60, color: Colors.grey.shade400),
+                        const SizedBox(height: 16),
+                        Text('No models available', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                      ],
+                    ),
+                  );
+                }
 
-                final model = displayModels[index]; 
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ModelPreviewPage(modelData: model),
+                // Firebase to list
+                final allModels = snapshot.data!.docs.map((doc) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  data['id'] = doc.id;
+                  return data;
+                }).toList();
+
+                //กรองข้อมูลตามที่ Search
+                final filteredModels = _searchKeyword.isEmpty
+                    ? allModels
+                    : allModels.where((model) => 
+                        (model['title'] ?? '').toString().toLowerCase().contains(_searchKeyword)).toList();
+
+                if (filteredModels.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 60, color: Colors.grey.shade400),
+                        const SizedBox(height: 16),
+                        Text('No results found', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                      ],
+                    ),
+                  );
+                }
+
+                return GridView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemCount: filteredModels.length,
+                  itemBuilder: (context, index) {
+                    final model = filteredModels[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ModelPreviewPage(modelData: model),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey.shade300, width: 1),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                width: double.infinity,
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                  child: Image.network(
+                                    model['image'] ?? '',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => 
+                                        const Icon(Icons.image, size: 50, color: Colors.grey),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    model['title'] ?? 'Untitled',
+                                    style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text('Material: ${model['material'] ?? '-'}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Price ฿${model['price'] ?? 0}',
+                                    style: TextStyle(color: Colors.grey.shade800, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.grey.shade300, width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                              child: Image.asset(
-                                model['image'],
-                                fit: BoxFit.contain,
-                                errorBuilder: (context, error, stackTrace) => 
-                                  const Icon(Icons.image, size: 50, color: Colors.grey),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                model['title'],
-                                style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text('Material: ${model['material']}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
-                              Text('Time: ${model['time']}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Price ฿${model['price']}',
-                                style: TextStyle(color: Colors.grey.shade800, fontSize: 11),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 );
               },
             ),
           ),
-          
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              '${displayModels.length} Items Found',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-            ),
-          )
         ],
       ),
     );
   }
 }
 
-//model pre view page
-
+//Model Preview
 class ModelPreviewPage extends StatelessWidget {
   final Map<String, dynamic> modelData;
 
@@ -286,7 +266,6 @@ class ModelPreviewPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // preview pic
                   Container(
                     width: double.infinity,
                     height: 250,
@@ -297,9 +276,9 @@ class ModelPreviewPage extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(
-                        modelData['image'],
-                        fit: BoxFit.contain,
+                      child: Image.network(
+                        modelData['image'] ?? '',
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => 
                             const Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
                       ),
@@ -310,19 +289,16 @@ class ModelPreviewPage extends StatelessWidget {
                   Text('Model Order Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark)),
                   const SizedBox(height: 16),
                   
-                  _buildDetailRow('Material:', modelData['material'], primaryDark),
-                  _buildDetailRow('Quality:', 'Mid', primaryDark),
-                  _buildDetailRow('Scrub:', 'No', primaryDark),
-                  _buildDetailRow('Color:', 'Filament Color', primaryDark),
-                  _buildDetailRow('File:', 'No', primaryDark),
-                  _buildDetailRow('Other:', 'No', primaryDark),
+                  _buildDetailRow('Title:', modelData['title'] ?? '-', primaryDark),
+                  _buildDetailRow('Material:', modelData['material'] ?? '-', primaryDark),
+                  _buildDetailRow('File Name:', modelData['fileName'] ?? '-', primaryDark),
                   
                   const SizedBox(height: 24),
                   
                   // ราคา
                   Text('Price', style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
                   Text(
-                    '฿${modelData['price']}',
+                    '฿${modelData['price'] ?? 0}',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: primaryDark),
                   ),
                 ],
