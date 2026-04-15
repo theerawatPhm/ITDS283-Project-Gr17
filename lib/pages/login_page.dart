@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'register_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,6 +28,44 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(builder: (context) => const HomePage()),
     );
+  }
+
+  Future<void> _loginUser() async{
+    if(_emailController.text.isEmpty || _passwordController.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill in all field')));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator())
+    );
+
+    try{
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
+      if(mounted) Navigator.pop(context);
+
+      if(userDoc.exists){
+        String role = userDoc.get('role');
+        print('Logged in as: $role');
+
+        if(mounted){
+          Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => const HomePage())
+          );
+        }
+      }
+    }on FirebaseAuthException catch (e){
+      if(mounted) Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+    }
   }
 
   @override
@@ -91,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _navigateToHome,
+                    onPressed: _loginUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryOrange,
                       padding: const EdgeInsets.symmetric(vertical: 14),
