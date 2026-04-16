@@ -12,35 +12,41 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
   final Color primaryOrange = const Color.fromARGB(232, 202, 86, 44);
   final Color bgColor = const Color(0xFFF8F8F8);
 
-  // Mock Data
   final List<Map<String, dynamic>> mockDesigners = [
     {
-      'name': 'Arun Amarin',
-      'specialty': 'Mechanical & Hard Surface',
-      'rating': '4.8 (120 reviews)',
+      'name': 'Tee',
+      'specialty': 'Mechanical & Hard Surface Expert',
+      'rating': '4.9 (150 reviews)',
       'price': 'Starts at ฿500',
-      'image': 'assets/img/designer1.jpg', // ถ้าไม่มีรูปในโฟลเดอร์ มันจะขึ้นไอคอนแทนให้ครับ
+      'image': 'assets/img/designer_1.jpg', 
     },
     {
-      'name': 'Sophi Kae',
-      'specialty': 'Character & Organic Modeling',
-      'rating': '4.9 (85 reviews)',
-      'price': 'Starts at ฿800',
-      'image': 'assets/img/designer2.jpg',
+      'name': 'Prw S.',
+      'specialty': 'Character & Organic Sculpting',
+      'rating': '4.8 (92 reviews)',
+      'price': 'Starts at ฿850',
+      'image': 'assets/img/designer_2.jpg',
     },
     {
-      'name': 'Wang Lang 3D',
-      'specialty': 'Architecture & Miniatures',
-      'rating': '4.7 (200 reviews)',
-      'price': 'Starts at ฿1200',
-      'image': 'assets/img/designer3.jpg',
+      'name': 'Baipor',
+      'specialty': 'Architecture & Landscape Modeling',
+      'rating': '4.6 (210 reviews)',
+      'price': 'Starts at ฿1,200',
+      'image': 'assets/img/designer_3.jpg',
     },
     {
-      'name': 'Poom Print & Design',
-      'specialty': 'Jewelry & Accessories',
-      'rating': '4.5 (45 reviews)',
-      'price': 'Starts at ฿400',
-      'image': 'assets/img/designer4.jpg',
+      'name': 'Amika C.',
+      'specialty': 'Jewelry & Accessory Design',
+      'rating': '4.5 (58 reviews)',
+      'price': 'Starts at ฿450',
+      'image': 'assets/img/designer_4.jpg',
+    },
+    {
+      'name': 'Mynn',
+      'specialty': 'Product Design & Rendering',
+      'rating': '4.8 (115 reviews)',
+      'price': 'Starts at ฿600',
+      'image': 'assets/img/designer_5.jpg',
     },
   ];
 
@@ -63,7 +69,6 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
             child: Container(
@@ -90,9 +95,7 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
                   Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: ElevatedButton(
-                      onPressed: () {
-                        
-                      },
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryDark,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -106,10 +109,7 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
               ),
             ),
           ),
-
           const SizedBox(height: 10),
-
-          // designer list
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
@@ -125,11 +125,9 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
     );
   }
 
-  // Widget
   Widget _buildDesignerCard(Map<String, dynamic> designer) {
     return GestureDetector(
       onTap: () {
-        // goto designer detail
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -147,7 +145,6 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
         ),
         child: Row(
           children: [
-            // profile
             Container(
               width: 70,
               height: 70,
@@ -159,14 +156,11 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
               child: Image.asset(
                 designer['image'],
                 fit: BoxFit.cover,
-                // ถ้าหารูปไม่เจอ ให้ขึ้นไอคอนคนแทน
                 errorBuilder: (context, error, stackTrace) => 
                     Icon(Icons.person, size: 40, color: Colors.grey.shade400),
               ),
             ),
             const SizedBox(width: 16),
-            
-            // info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,7 +174,7 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
                       const SizedBox(width: 4),
                       Text(designer['rating'], style: TextStyle(color: primaryDark, fontSize: 12)),
                     ],
@@ -200,11 +194,8 @@ class _FindDesignerPageState extends State<FindDesignerPage> {
   }
 }
 
-// Profile Detail page เด้งขึ้นมาหลังกดเลือก designer
-
 class DesignerProfilePage extends StatelessWidget {
   final Map<String, dynamic> designerData;
-
   const DesignerProfilePage({super.key, required this.designerData});
 
   @override
@@ -236,7 +227,6 @@ class DesignerProfilePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  
                   Container(
                     width: 120,
                     height: 120,
@@ -254,13 +244,9 @@ class DesignerProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
                   Text(designerData['name'], style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: primaryDark)),
                   Text(designerData['specialty'], style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
-                  
                   const SizedBox(height: 24),
-                  
-                  
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -274,13 +260,13 @@ class DesignerProfilePage extends StatelessWidget {
                         Text('About', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryDark)),
                         const SizedBox(height: 8),
                         Text(
-                          'I am a professional 3D designer with 5 years of experience in creating mechanical parts and character models. Ready to bring your ideas to life!',
+                          'Expert designer dedicated to high-quality 3D modeling and innovation. Let\'s make your vision a reality.',
                           style: TextStyle(color: Colors.grey.shade700, height: 1.5, fontSize: 14),
                         ),
                         const Divider(height: 30),
                         _buildDetailRow('Rating:', designerData['rating'], primaryDark),
                         _buildDetailRow('Starting Price:', designerData['price'], primaryDark),
-                        _buildDetailRow('Contact:', 'hello@designer.com', primaryDark),
+                        _buildDetailRow('Contact:', '${designerData['name'].toString().toLowerCase().replaceAll(' ', '')}@3dnow.com', primaryDark),
                       ],
                     ),
                   ),
@@ -288,8 +274,6 @@ class DesignerProfilePage extends StatelessWidget {
               ),
             ),
           ),
-          
-          // button
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(color: bgColor),
@@ -297,10 +281,7 @@ class DesignerProfilePage extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  
-                  print('ไปหน้ากรอกรายละเอียดจ้างดีไซเนอร์');
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryOrange,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
