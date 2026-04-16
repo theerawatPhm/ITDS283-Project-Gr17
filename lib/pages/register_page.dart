@@ -41,23 +41,40 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     try {
+      // 1. สร้าง account ใน Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+      String uid = userCredential.user!.uid;
+
+      // 2. save info ใน collection 'users'
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'name': _nameController.text.trim(),
         'email': _emailController.text.trim(),
         'role': _selectedRole,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      if (mounted) Navigator.pop(context);
+      // 3. if designer
+      if (_selectedRole == 'designer') {
+        await FirebaseFirestore.instance.collection('designers').doc(uid).set({
+          'uid': uid,
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'specialty': 'New Designer', 
+          'rating': '0.0 (0 reviews)', 
+          'price': 'Starts at ฿0',      
+          'image': 'assets/img/designer_1.jpg', //default pic
+        });
+      }
+
+      if (mounted) Navigator.pop(context); 
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Account created successfully! Please login')));
-        Navigator.pop(context); // เด้งกลับไปหน้า Login
+        Navigator.pop(context); 
       }
 
     } on FirebaseAuthException catch (e) {
@@ -115,7 +132,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: ElevatedButton(
                         onPressed: () {
                           _registerUser();
-                          print('Registering as $_selectedRole'); 
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryOrange,
