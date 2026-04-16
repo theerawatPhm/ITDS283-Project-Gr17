@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'edit_model_page.dart';
 
 class MyModelPage extends StatefulWidget {
   const MyModelPage({super.key});
@@ -36,7 +37,7 @@ class _MyModelPageState extends State<MyModelPage> {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
         .collection('app3dnow_marketplace')
-        .where('userId', isEqualTo: currentUser?.uid)
+        .where('designerId', isEqualTo: currentUser?.uid)
         .snapshots(),
         builder: (context, snapshot) {
           if(snapshot.connectionState == ConnectionState.waiting){
@@ -55,11 +56,12 @@ class _MyModelPageState extends State<MyModelPage> {
             );
           }
           return GridView.builder(
+            padding: const EdgeInsets.all(24.0),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 0.75),
+              childAspectRatio: 0.65),
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index){
               var model = snapshot.data!.docs[index].data() as Map<String, dynamic>;
@@ -68,6 +70,44 @@ class _MyModelPageState extends State<MyModelPage> {
               return Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey.shade300)
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(model['image'] ?? '',
+                          fit: BoxFit.cover,
+                          width: double.infinity,),
+                        ),
+                      ),
+                    ),
+                    Padding(padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Text(model['title'] ?? 'Untitled', style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 16)),
+                        const SizedBox(height: 4,),
+                        Text('฿${model['price'] ?? 0}', style: TextStyle(color: primaryDark, fontSize: 14),),
+                        const SizedBox(height: 4,),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(onPressed: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> EditModelPage(docId: docId, modelData: model)));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryDark,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 4)
+                          ),
+                          child: const Text('Edit', style: TextStyle(color: Colors.white, fontSize: 12),)),
+                        )
+                      ],
+                    ),)
+                  ],
                 ),
               );
             },
