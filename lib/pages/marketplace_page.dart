@@ -1,4 +1,5 @@
 import 'package:app_3d_now/pages/add_model_page.dart';
+import 'package:app_3d_now/pages/my_model_page.dart';
 import 'package:flutter/material.dart';
 import 'find_store_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,15 +57,33 @@ class _MarketplacePageState extends State<MarketplacePage> {
         centerTitle: true,
       ),
       floatingActionButton: _userRole == 'designer'
-          ? FloatingActionButton(
+          ? Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ElevatedButton.icon(onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=> MyModelPage()));
+              },
+              icon: const Icon(Icons.edit_document, color: Colors.white, size: 20,),
+              label: const Text('Edit My Model', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryDark,
+                elevation: 4,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              ),
+              ),
+              const SizedBox(height: 16,),
+              FloatingActionButton(onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=> const AddModelPage()));
+              },
               backgroundColor: primaryOrange,
-              elevation: 4,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              child: const Icon(Icons.add, color: Colors.white, size: 30,),
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AddModelPage()));
-              })
-          : null,
+              child: const Icon(Icons.add, color: Colors.white, size: 28,),),
+            ],
+          )
+          :null,
       body: Column(
         children: [
           //search box
