@@ -417,7 +417,7 @@ class _DesignerProfilePageState extends State<DesignerProfilePage> {
 
             // --- 5. ปุ่ม Next ---
             Align(
-              alignment: Alignment.center, // ในรูปปุ่ม Next อยู่ขวาล่างหรือตรงกลาง
+              alignment: Alignment.center,
               child: ElevatedButton(
                 onPressed: () {
                   // go to Review Order
@@ -425,9 +425,8 @@ class _DesignerProfilePageState extends State<DesignerProfilePage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ReviewOrderPage(
-                        
-                        fileName: widget.designerData['name'], 
-                        fileSize: '-', 
+                        designerDescription: _describeController.text.isEmpty ? "Hire: ${widget.designerData['name']}" : _describeController.text,
+                    
                         material: _selectedMaterial,
                         quality: _selectedQuality,
                         scrub: _selectedScrub,
