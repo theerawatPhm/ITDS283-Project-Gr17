@@ -398,6 +398,7 @@ class StoreDetailPage extends StatelessWidget {
       showDialog(context: context,
       builder: (BuildContext dialogContext){
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           contentPadding: const EdgeInsets.all(32),
           content: Column(
