@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'find_store_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MarketplacePage extends StatefulWidget {
   const MarketplacePage({super.key});
@@ -32,12 +33,14 @@ class _MarketplacePageState extends State<MarketplacePage> {
     if (user != null) {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       if (userDoc.exists && mounted) {
+        final data = userDoc.data() as Map<String, dynamic>;
         setState(() {
-          _userRole = userDoc.get('role') ?? 'customer';
+          _userRole = (data != null && data.containsKey('role')) ? data['role'] : 'customer';
         });
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +54,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Find Model',
+          'Marketplace',
           style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
@@ -205,12 +208,14 @@ class _MarketplacePageState extends State<MarketplacePage> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                  child: Image.network(
-                                    model['image'] ?? '',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => 
-                                        const Icon(Icons.image, size: 50, color: Colors.grey),
-                                  ),
+                                  child: (model['image'] != null && model['image'].toString().isNotEmpty)
+                                      ? Image.network(
+                                          model['image'],
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => 
+                                              const Icon(Icons.image, size: 50, color: Colors.grey),
+                                        )
+                                      : const Icon(Icons.image, size: 50, color: Colors.grey),
                                 ),
                               ),
                             ),
@@ -256,6 +261,23 @@ class ModelPreviewPage extends StatelessWidget {
 
   const ModelPreviewPage({super.key, required this.modelData});
 
+    Future<void> _downloadFile(BuildContext context, String? url) async{
+    if(url == null || url.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No 3D file available for download')),
+      );
+      return;
+    }
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)){
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }else{
+      if(context.mounted){
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not start download'))
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color primaryDark = const Color(0xFF4A3B52);
@@ -287,7 +309,6 @@ class ModelPreviewPage extends StatelessWidget {
                 children: [
                   Container(
                     width: double.infinity,
-                    height: 250,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20),
@@ -297,7 +318,6 @@ class ModelPreviewPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                       child: Image.network(
                         modelData['image'] ?? '',
-                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => 
                             const Icon(Icons.inventory_2_outlined, size: 80, color: Colors.grey),
                       ),
@@ -331,13 +351,17 @@ class ModelPreviewPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.info_outline, color: primaryDark, size: 28),
-                    const SizedBox(height: 4),
-                    Text('Information', style: TextStyle(color: primaryDark, fontSize: 12)),
-                  ],
+                InkWell(
+                  onTap: () => _downloadFile(context, modelData['fileUrl']),
+                  child: Padding(padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.file_download, color: primaryDark, size: 30),
+                      const SizedBox(height: 4,),
+                      Text('Download', style: TextStyle(color: primaryDark, fontSize: 13, fontWeight: FontWeight.bold),)
+                    ],
+                  ),),
                 ),
                 SizedBox(
                   width: 180,

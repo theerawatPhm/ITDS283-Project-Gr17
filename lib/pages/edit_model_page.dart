@@ -47,6 +47,39 @@ class _EditModelPageState extends State<EditModelPage> {
     }
   }
 
+  Future<void> _deleteModel() async{
+    try{
+      await FirebaseFirestore.instance
+      .collection('app3dnow_marketplace')
+      .doc(widget.docId)
+      .delete();
+
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Model Deleted Successfully')));
+        Navigator.pop(context);
+      }
+    }catch (e){
+      print('Error: $e');
+    }
+  }
+
+  void _showDeleteDialog(){
+    showDialog(context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Text('Delete Model', style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold)),
+      content: const Text('Are you sure? You want to delete this model.\nThis action cannot be undone.'),
+      actions: [
+        TextButton(onPressed: ()=> Navigator.pop(context),
+        child: const Text('Cancel', style: TextStyle(color: Colors.grey, fontSize: 18)),
+        ),
+        TextButton(onPressed: _deleteModel,
+        child: const Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 18),))
+      ],
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +153,20 @@ class _EditModelPageState extends State<EditModelPage> {
                 ),
                 child: const Text('Save Changes',
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),)),
+            ),
+            const SizedBox(height: 16,),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: OutlinedButton.icon(
+                onPressed: _showDeleteDialog,
+                icon: Icon(Icons.delete_outline, color: Colors.red,),
+                label: Text('Delete Model',
+                style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red, width: 1.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26))
+                )),
             )
           ],
         ),
