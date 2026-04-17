@@ -6,9 +6,11 @@ import 'find_store_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:app_3d_now/pages/edit_model_page.dart';
 
 class MarketplacePage extends StatefulWidget {
-  const MarketplacePage({super.key});
+  final String initialQuery;
+  const MarketplacePage({super.key, this.initialQuery = ''});
 
   @override
   State<MarketplacePage> createState() => _MarketplacePageState();
@@ -27,6 +29,11 @@ class _MarketplacePageState extends State<MarketplacePage> {
   void initState() {
     super.initState();
     _checkUserRole();
+
+    if(widget.initialQuery.isNotEmpty){
+      _searchKeyword = widget.initialQuery.toLowerCase();
+      _searchController.text = widget.initialQuery;
+    }
   }
 
   Future<void> _checkUserRole() async {
@@ -184,65 +191,86 @@ class _MarketplacePageState extends State<MarketplacePage> {
                     final model = filteredModels[index];
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ModelPreviewPage(modelData: model),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ModelPreviewPage(modelData: model)));
                       },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey.shade300, width: 1),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                width: double.infinity,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.grey.shade300, width: 1),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    width: double.infinity,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                      child: (model['image'] != null && model['image'].toString().isNotEmpty)
+                                          ? Image.network(
+                                              model['image'],
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) => 
+                                                  const Icon(Icons.image, size: 50, color: Colors.grey),
+                                            )
+                                          : const Icon(Icons.image, size: 50, color: Colors.grey),
+                                    ),
+                                  ),
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                  child: (model['image'] != null && model['image'].toString().isNotEmpty)
-                                      ? Image.network(
-                                          model['image'],
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) => 
-                                              const Icon(Icons.image, size: 50, color: Colors.grey),
-                                        )
-                                      : const Icon(Icons.image, size: 50, color: Colors.grey),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        model['title'] ?? 'Untitled',
+                                        style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text('Material: ${model['material'] ?? '-'}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Price ฿${model['price'] ?? 0}',
+                                        style: TextStyle(color: Colors.grey.shade800, fontSize: 11),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          if (_userRole == 'admin')
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white.withOpacity(0.9),
+                                radius: 18,
+                                child: IconButton(
+                                  icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditModelPage(docId: model['id'], modelData: model),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    model['title'] ?? 'Untitled',
-                                    style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text('Material: ${model['material'] ?? '-'}', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Price ฿${model['price'] ?? 0}',
-                                    style: TextStyle(color: Colors.grey.shade800, fontSize: 11),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                        ],
                       ),
                     );
                   },

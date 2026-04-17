@@ -11,6 +11,7 @@ import 'marketplace_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
+import 'manage_whatsnew_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,6 +27,26 @@ class _HomePageState extends State<HomePage> {
   final Color primaryDark = const Color(0xFF4A3B52);
   final Color primaryOrange = const Color.fromARGB(232, 202, 86, 44);
   final Color bgColor = const Color(0xFFF8F8F8);
+
+  String _userRole = 'customer';
+  @override
+  void initState(){
+    super.initState();
+    _checkUserRole();
+  }
+
+  Future<void> _checkUserRole() async{
+    final user = FirebaseAuth.instance.currentUser;
+    if(user != null){
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if(userDoc.exists && mounted){
+        final data = userDoc.data() as Map<String, dynamic>?;
+        setState(() {
+          _userRole = (data != null && data.containsKey('role')) ? data['role'] : 'customer';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,18 +79,18 @@ void _showProfileModal(BuildContext context) {
           future: FirebaseFirestore.instance.collection('users').doc(user.uid).get(),
           builder: (context, snapshot) {
             
-            if (snapshot.connectionState == ConnectionState.waiting) {
+            if (!snapshot.hasData || !snapshot.data!.exists) {
               return Container(
                 height: 300,
                 decoration: const BoxDecoration(
                   color: Color(0xFFF8F8F8), 
                   borderRadius: BorderRadius.vertical(top: Radius.circular(40))
                 ),
-                child: const Center(child: CircularProgressIndicator())
+                child: const Center(child: Text('User data not found')),
               );
             }
 
-            var userData = snapshot.data!.data() as Map<String, dynamic>;
+            var userData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
             String name = userData['name'] ?? 'No Name';
             String email = userData['email'] ?? 'No Email';
             String role = userData['role'] ?? 'customer';
@@ -158,7 +179,30 @@ Widget _buildHomeContent() {
               ],
             ),
             const SizedBox(height: 24),
-            CustomSearchBar(hintText: 'hintText'),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(color: primaryOrange, width: 1.5),
+              ),
+              child: TextField(
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) {
+                  if(value.trim().isNotEmpty){
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => MarketplacePage(initialQuery: value.trim())
+                    ),
+                    );
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search for model in Marketplace...',
+                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                  prefixIcon: Icon(Icons.search, color: primaryOrange,),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14)
+                ),
+              ),
+            ),
             // _buildSearchbar(),
             const SizedBox(height: 20),
             // ProcessingBanner(orderCount: 1, progressPercent: 50),
@@ -212,13 +256,15 @@ Widget _buildHomeContent() {
             _buildServicesList(),
             const SizedBox(height: 20),
             Text(
-              'What\'s New',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: primaryDark,
-              ),
-            ),
+              'What\'s New',style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: primaryDark,)),
+              if(_userRole == 'admin')
+              TextButton.icon(onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) =>ManageWhatsNewPage()));
+              },
+              icon: Icon(Icons.settings, color: primaryOrange, size: 20,),
+              label: Text('Manage', style: TextStyle(color: primaryOrange, fontWeight: FontWeight.bold),),
+              )
+              ,
             const SizedBox(height: 20,),
             _buildWhatsNewList()
           ],
@@ -240,7 +286,6 @@ Widget _buildServicesList() {
             padding: const EdgeInsets.only(right: 12.0),
             child: GestureDetector(
               onTap: () {
-                //go to each page
                 print('On tap test $service');
                 
                 if (service == 'Find Designer') {
@@ -275,20 +320,45 @@ Widget _buildServicesList() {
   }
 
   Widget _buildWhatsNewList(){
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _buildNewCard(
-            title: 'New arrival, Medical model',
-            tag: 'NEW',
-            date: '2 days ago',
-            imagePath: 'assets/img/forceps7.jpg'
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('app3dnow_whatsnew')
+      .orderBy('createdAt', descending: true)
+      .snapshots(),
+      builder: (context, snapshot){
+        if(snapshot.connectionState == ConnectionState.waiting){
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if(!snapshot.hasData || snapshot.data!.docs.isEmpty){
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildNewCard(title: 'New arrival, Medical model', tag: 'NEW', date: '2 days ago', imagePath: 'assets/img/forceps7.jpg'),
+                const SizedBox(width: 16,),
+                _buildNewCard(title: 'Game Boy Model', tag: '', date: '2 Weeks ago', imagePath: 'assets/img/gameboyImage.png')
+              ],
+            ),
+          );
+        }
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: snapshot.data!.docs.map((doc) {
+              var data = doc.data() as Map<String, dynamic>;
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: _buildNewCard(
+                  title: data['title'] ?? 'Untitled',
+                  tag: data['tag'] ?? '',
+                  date: data['date'] ?? 'Today',
+                  imagePath: data['imagePath'] ?? 'assets/img/forceps7.jpg',
+                ),
+              );
+            }).toList(),
           ),
-          const SizedBox(width: 16,),
-          _buildNewCard(title: 'Orange model has release', tag: '', date: '2 days ago', imagePath: 'assets/img/forceps7.jpg'),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -321,7 +391,13 @@ Widget _buildServicesList() {
                   color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Image.asset(imagePath, fit: BoxFit.cover,),
+                child: imagePath.startsWith('http')
+                    ? Image.network(
+                        imagePath, 
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, color: Colors.grey),
+                      )
+                    : Image.asset(imagePath, fit: BoxFit.cover),
               ),
               if(tag.isNotEmpty)
                 Positioned(
