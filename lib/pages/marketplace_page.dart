@@ -67,7 +67,7 @@ class _MarketplacePageState extends State<MarketplacePage> {
         ),
         centerTitle: true,
       ),
-      floatingActionButton: _userRole == 'designer'
+      floatingActionButton: (_userRole == 'designer' || _userRole == 'admin')
           ? Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.end,

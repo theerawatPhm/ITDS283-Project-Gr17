@@ -209,6 +209,7 @@ class _ManageWhatsNewPageState extends State<ManageWhatsNewPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddNewsDialog,
         backgroundColor: primaryOrange,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
