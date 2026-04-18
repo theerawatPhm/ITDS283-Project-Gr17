@@ -177,27 +177,17 @@ class _FindStorePageState extends State<FindStorePage> {
           ),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Container(
-            padding: const EdgeInsets.only(left: 20, right: 4, top: 4, bottom: 4),
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(30),
               border: Border.all(color: primaryOrange, width: 1.5),
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(isLoading ? 'Locating' : currentLocation, style: TextStyle(color: primaryOrange, fontWeight: FontWeight.w600),
                 ),
-                ElevatedButton(
-                  onPressed: (){
-                    // TODO: let user press
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryOrange,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                    elevation: 0,
-                  ), child: const Text('Enter', style: TextStyle(color: Colors.white)),
-                )
               ],
             ),
           ),
