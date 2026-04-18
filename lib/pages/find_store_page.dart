@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'payment_page.dart';
+import 'review_order_page.dart';
 
 class FindStorePage extends StatefulWidget {
   final Map<String, dynamic>? modelData;
@@ -409,16 +410,17 @@ class StoreDetailPage extends StatelessWidget {
                               onPressed: () {
                                 if (modelData != null) {
                                   //ถ้ามี Order แล้ววิ่งเข้า Payment เลย
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => PaymentPage(
-                                    totalAmount: (modelData!['price'] ?? 0).toDouble() + 5.99,
-                                    orderDetails: {
-                                      'modelId': modelData!['id'] ?? '',
-                                      'title': modelData!['title'] ?? '3D Model',
-                                      'storeName': StoreData['name'],
-                                      'orderType': 'print_at_store',
-                                      'designerDescription': '',
-                                    }
-                                  )));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewOrderPage(
+                                    fileName: modelData!['filename'] ?? modelData!['title'] ?? 'Custom Model',
+                                    fileSize: modelData!['filesize'] ?? '-',
+                                    material: modelData!['material'] ?? '-',
+                                    quality: modelData!['quality'] ?? '-',
+                                    scrub: modelData!['scrub'] ?? '-',
+                                    color: modelData!['color'] ?? '-',
+                                    requestFile: modelData!['requestFile'] ?? '-',
+                                    otherText: modelData!['otherText'] ?? '-',
+                                    storeName: StoreData['name'],
+                                    )));
                                 } else {
                                   _showOrderAlert(context, primaryOrange, primaryDark);
                                 }

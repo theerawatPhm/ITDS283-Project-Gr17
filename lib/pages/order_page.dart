@@ -254,7 +254,7 @@ class _OrderPageState extends State<OrderPage> {
     }
 
     String rawFileName = order['fileName'] ?? '';
-    String displayTitle = rawFileName;
+    String displayTitle = order['title'] ?? rawFileName;
 
     if(displayTitle.contains('.')){
       displayTitle = displayTitle.substring(0, displayTitle.lastIndexOf('.'));
@@ -300,6 +300,8 @@ class _OrderPageState extends State<OrderPage> {
                   _buildDetailText('Color:', order['color'] ?? '-'),
                   _buildDetailText('File:', (rawFileName.isNotEmpty && rawFileName !=  'Designer Request') ? rawFileName : '-'),
                   _buildDetailText('Other:', order['otherText'] ?? order['other'] ?? '-'),
+                  _buildDetailText('Store', order['storeName'] ?? '-'),
+
                 ],
               ),
               ),

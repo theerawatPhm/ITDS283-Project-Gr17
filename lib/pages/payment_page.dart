@@ -105,7 +105,7 @@ class _PaymentPageState extends State<PaymentPage> {
                     
                     _buildSummaryRow('Designer', designerName),
                     const SizedBox(height: 8),
-                    _buildSummaryRow('Store', '-'),
+                    _buildSummaryRow('Store', widget.orderDetails['storeName'] ?? '-'),
                     const SizedBox(height: 32),
 
                     Text(

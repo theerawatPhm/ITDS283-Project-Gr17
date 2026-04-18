@@ -6,6 +6,7 @@ class ReviewOrderPage extends StatelessWidget {
   final String? fileName;
   final String? fileSize;
   final String? designerDescription;
+  final String? storeName;
 
   final String material;
   final String quality;
@@ -19,6 +20,7 @@ class ReviewOrderPage extends StatelessWidget {
     this.fileName,
     this.fileSize,
     this.designerDescription,
+    this.storeName,
     required this.material,
     required this.quality,
     required this.scrub,
@@ -87,6 +89,10 @@ class ReviewOrderPage extends StatelessWidget {
                     _buildDetailRow('File:', requestFile, primaryDark),
                     _buildDetailRow('Other:', otherText, primaryDark),
 
+                    if(storeName != null)
+                    _buildDetailRow('Store', storeName! , primaryDark)
+                    ,
+
                     const SizedBox(height: 32,),
                     Text('Purchase', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryDark),),
                     const SizedBox(height: 16),
@@ -135,6 +141,8 @@ class ReviewOrderPage extends StatelessWidget {
                           'color': color,
                           'requestFile': requestFile,
                           'otherText': otherText,
+                          'storeName' : storeName ?? '-',
+                          'orderType' : storeName != null ? 'print_at_store' : 'custom_request'
                         };
                         Navigator.push(
                           context,

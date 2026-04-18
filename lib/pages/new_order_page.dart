@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'review_order_page.dart';
+import 'find_store_page.dart';
 
 class NewDesign extends StatefulWidget {
   final VoidCallback? onBackToHome;
@@ -111,15 +112,18 @@ class _NewDesignState extends State<NewDesign> {
                           return;
                       }
 
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewOrderPage(
-                        fileName: _selectedFileName!,
-                        fileSize: _selectedFileSizes ?? 'Unknown Size',
-                        material: _selectedMaterial,
-                        quality: _selectedQuality,
-                        scrub: _selectedScrub,
-                        color: _SelectedColor,
-                        requestFile: _selectedRequestFile,
-                        otherText: _otherController.text.trim().isEmpty ? 'No' : _otherController.text.trim())));
+                      Map<String, dynamic> customModelData = {
+                     'fileName': _selectedFileName!,
+                     'fileSize': _selectedFileSizes ?? 'Unknown Size',
+                     'material': _selectedMaterial,
+                     'quality': _selectedQuality,
+                     'scrub': _selectedScrub,
+                     'color': _SelectedColor,
+                     'requestFile': _selectedRequestFile,
+                     'otherText': _otherController.text.trim().isEmpty ? 'No' : _otherController.text.trim(),
+                   };
+
+                   Navigator.push(context, MaterialPageRoute(builder: (context) => FindStorePage(modelData: customModelData,)));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryOrange,
