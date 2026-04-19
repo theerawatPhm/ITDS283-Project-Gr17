@@ -78,6 +78,36 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 
+//remove complete order
+  void _showRemoveDialog(BuildContext context, String docId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: Text('Remove Order?', style: TextStyle(color: primaryDark, fontWeight: FontWeight.bold)),
+        content: const Text('Are you sure to remove this complete order? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No, keep it', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _cancelOrder(docId); 
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade400,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            child: const Text('Yes, Remove', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showCompleteDialog(BuildContext context, String docId){
     showDialog(
       context: context,
@@ -342,7 +372,7 @@ class _OrderPageState extends State<OrderPage> {
                 Row(
                   children: [
                     OutlinedButton(
-                      onPressed: () => _showCancelDialog(context, order['id']),
+                      onPressed: () => _showRemoveDialog(context, order['id']),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(20)),
