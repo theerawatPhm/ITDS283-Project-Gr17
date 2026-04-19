@@ -64,7 +64,26 @@ class _LoginPageState extends State<LoginPage> {
       }
     }on FirebaseAuthException catch (e){
       if(mounted) Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
+
+      String errorMessgae = 'Login Failed';
+      if(e.code == 'user-not-found'){
+        errorMessgae = 'User not found';
+      }else if(e.code == 'wrong-password'){
+        errorMessgae = 'Wrong password';
+      }else if(e.code == 'invalid-email'){
+        errorMessgae = 'Invalid Email';
+      }else if(e.code == 'invalid-credential'){
+        errorMessgae = 'Incorrect Email or Password';
+      }else{
+        errorMessgae = e.message ?? 'Error Please try again';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(errorMessgae),
+      backgroundColor: Colors.red.shade600,)
+      );
+    }catch (e){
+      if(mounted) Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error Please Try again')));
     }
   }
 
