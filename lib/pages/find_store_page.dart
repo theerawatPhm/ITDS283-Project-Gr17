@@ -411,8 +411,8 @@ class StoreDetailPage extends StatelessWidget {
                                 if (modelData != null) {
                                   //ถ้ามี Order แล้ววิ่งเข้า Payment เลย
                                   Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewOrderPage(
-                                    fileName: modelData!['filename'] ?? modelData!['title'] ?? 'Custom Model',
-                                    fileSize: modelData!['filesize'] ?? '-',
+                                    fileName: modelData!['fileName'] ?? modelData!['title'] ?? 'Custom Model',
+                                    fileSize: modelData!['fileSize'] ?? '-',
                                     material: modelData!['material'] ?? '-',
                                     quality: modelData!['quality'] ?? '-',
                                     scrub: modelData!['scrub'] ?? '-',
